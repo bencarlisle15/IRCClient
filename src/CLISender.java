@@ -7,6 +7,8 @@ import javafx.scene.control.TextField;
 import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.security.*;
+import java.security.cert.CertificateException;
 import java.util.ArrayList;
 
 
@@ -15,6 +17,9 @@ import org.json.JSONString;
 import org.json.JSONStringer;
 import org.json.JSONWriter;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.swing.*;
 
 public class CLISender implements Runnable {
@@ -34,7 +39,7 @@ public class CLISender implements Runnable {
         try {
             Socket socket = new Socket(serverIP, serverPort);
             OutputStream outputStream = new BufferedOutputStream(socket.getOutputStream());
-            outputStream.write(getNextMessage().getBytes(StandardCharsets.UTF_8));
+            outputStream.write((getNextMessage()).getBytes(StandardCharsets.UTF_8));
             removeLastMessage();
             outputStream.flush();
             InputStream inputStream = new DataInputStream(socket.getInputStream());
@@ -47,6 +52,7 @@ public class CLISender implements Runnable {
 
     private String getNextMessage() {
         synchronized (messages) {
+            System.out.println(messages.get(0));
             return messages.get(0);
         }
     }
@@ -73,12 +79,17 @@ public class CLISender implements Runnable {
     }
 
     private void recievedMessage(byte[] messageBytes) {
-        String message = new String(messageBytes);
-        System.out.println(message);
-        JOptionPane.showMessageDialog(null, message);
-        JSONObject json = new JSONObject(message);
-        if (json.has("sessionID")) {
-            sessionID = json.get("sessionID").toString();
+        try {
+            String message = new String(new RSA().decryptAES(messageBytes));
+            System.out.println(message);
+            JOptionPane.showMessageDialog(null, message);
+            JSONObject json = new JSONObject(message);
+            if (json.has("sessionID")) {
+                sessionID = json.get("sessionID").toString();
+            }
+        } catch (NoSuchPaddingException | NoSuchAlgorithmException | UnrecoverableKeyException | CertificateException | KeyStoreException | IOException | BadPaddingException | IllegalBlockSizeException | InvalidKeyException | InvalidAlgorithmParameterException e) {
+            e.printStackTrace();
+            System.out.println("Could not decript");
         }
     }
 }

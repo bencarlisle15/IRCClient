@@ -30,7 +30,7 @@ public class Sender implements Runnable, EventHandler<ActionEvent> {
         this.serverPort = serverPort;
         this.senderField = senderField;
         this.messageField = messageField;
-        messages = new ArrayList<>();
+        messages = new ArrayList<String>();
     }
 
     public void run() {

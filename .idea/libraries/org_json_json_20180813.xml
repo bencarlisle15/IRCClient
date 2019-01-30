@@ -2,13 +2,9 @@
   <library name="org.json:json:20180813" type="repository">
     <properties maven-id="org.json:json:20180813" />
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/lib/json-20180813.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/json/json/20180813/json-20180813.jar!/" />
     </CLASSES>
-    <JAVADOC>
-      <root url="jar://$PROJECT_DIR$/lib/json-20180813-javadoc.jar!/" />
-    </JAVADOC>
-    <SOURCES>
-      <root url="jar://$PROJECT_DIR$/lib/json-20180813-sources.jar!/" />
-    </SOURCES>
+    <JAVADOC />
+    <SOURCES />
   </library>
 </component>
