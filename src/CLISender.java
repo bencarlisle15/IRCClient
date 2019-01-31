@@ -9,6 +9,7 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.cert.CertificateException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 
 
@@ -28,10 +29,12 @@ public class CLISender implements Runnable {
     private int serverPort;
     private final ArrayList<String> messages;
     private String sessionID;
+    private RSA rsa;
 
-    public CLISender(String serverIP, int serverPort) {
+    public CLISender(String serverIP, int serverPort, RSA rsa) {
         this.serverIP = serverIP;
         this.serverPort = serverPort;
+        this.rsa = rsa;
         messages = new ArrayList<>();
     }
 
@@ -80,16 +83,24 @@ public class CLISender implements Runnable {
 
     private void recievedMessage(byte[] messageBytes) {
         try {
-            String message = new String(new RSA().decryptAES(messageBytes));
+            String message = new String(rsa.decryptAES(messageBytes));
             System.out.println(message);
             JOptionPane.showMessageDialog(null, message);
             JSONObject json = new JSONObject(message);
             if (json.has("sessionID")) {
                 sessionID = json.get("sessionID").toString();
+                try {
+                    new CLIServer(serverIP, serverPort, sessionID, rsa).start();
+                } catch (InvalidKeySpecException e) {
+                    e.printStackTrace();
+                    System.out.println("Could not start server");
+                }
             }
         } catch (NoSuchPaddingException | NoSuchAlgorithmException | UnrecoverableKeyException | CertificateException | KeyStoreException | IOException | BadPaddingException | IllegalBlockSizeException | InvalidKeyException | InvalidAlgorithmParameterException e) {
             e.printStackTrace();
-            System.out.println("Could not decript");
+            System.out.println("Could not decrypt");
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

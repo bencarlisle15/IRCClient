@@ -32,10 +32,8 @@ public class CLIDriver {
 
     public static void mainExceptions(String[] args) throws InvalidKeySpecException, NoSuchAlgorithmException, IOException, InvalidKeyException, BadPaddingException, NoSuchPaddingException, IllegalBlockSizeException, KeyStoreException, CertificateException, UnrecoverableKeyException, InvalidAlgorithmParameterException {
         Scanner scanner  = new Scanner(System.in);
-        CLISender sender = new CLISender(serverIP, serverPort);;
-        CLIListener listener = new CLIListener(serverIP, serverPort);
-        listener.start();
         RSA rsa = new RSA();
+        CLISender sender = new CLISender(serverIP, serverPort, rsa);
         while (true) {
             String response = scanner.nextLine();
             if (response.equals("exit")) {
@@ -56,7 +54,7 @@ public class CLIDriver {
                     user = arguments[1];
                     password = arguments[2];
                     jsonText = new JSONStringer().object().key("messageType").value("register").key("user").value(user).key("password").value(password).endObject().toString();
-                    sender.sendMessage(rsa.encryptEverything(jsonText, user, true));
+                    sender.sendMessage(rsa.encryptEverything(jsonText, true));
                     break;
                 case "login":
                     if (arguments.length != 3) {
@@ -64,21 +62,21 @@ public class CLIDriver {
                         break;
                     }
                     user = arguments[1];
+                    rsa.setUser(user);
                     password = arguments[2];
-                    jsonText = new JSONStringer().object().key("messageType").value("login").key("user").value(user).key("password").value(password).key("ip").value(listener.getCurrentIP()).key("port").value(listener.getCurrentPort()).endObject().toString();
-                    sender.sendMessage(rsa.encryptEverything(jsonText, user, false));
+                    jsonText = new JSONStringer().object().key("messageType").value("login").key("user").value(user).key("password").value(password).endObject().toString();
+                    sender.sendMessage(rsa.encryptEverything(jsonText, false));
                     break;
                 case "send":
-                    if (arguments.length < 4) {
+                    if (arguments.length < 3) {
                         System.out.println("Wrong number of arguments");
                         break;
                     }
-                    String from = arguments[1];
-                    String to = arguments[2];
+                    String to = arguments[1];
                     String message = createMessage(arguments);
                     String sessionID = sender.getSessionID();
-                    jsonText = new JSONStringer().object().key("messageType").value("sendMessage").key("from").value(from).key("to").value(to).key("message").value(message).key("sessionID").value(sessionID).endObject().toString();
-                    sender.sendMessage(new String(rsa.encryptEverything(jsonText, from, false)));
+                    jsonText = new JSONStringer().object().key("messageType").value("sendMessage").key("from").value(rsa.getUser()).key("to").value(to).key("message").value(message).key("sessionID").value(sessionID).endObject().toString();
+                    sender.sendMessage(new String(rsa.encryptEverything(jsonText, false)));
                     break;
                 default:
                     System.out.println("Command not found");
@@ -88,7 +86,7 @@ public class CLIDriver {
 
     public static String createMessage(String[] arguments) {
         StringBuilder message = new StringBuilder();
-        for (int i = 3; i < arguments.length; i++) {
+        for (int i = 2; i < arguments.length; i++) {
             message.append(arguments[i]).append(" ");
         }
         return message.toString();
