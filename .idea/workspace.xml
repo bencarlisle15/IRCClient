@@ -2,18 +2,15 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="17ef3d17-6c18-454f-9cdb-382d37b3e33c" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/CLIServer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/com_offbynull_portmapper_portmapper_2_0_5.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/waifupnp_1.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/IRCClient.iml" beforeDir="false" afterPath="$PROJECT_DIR$/IRCClient.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/IRCClient/CLIDriver.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/IRCClient/CLIDriver.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/IRCClient/CLIListener.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/IRCClient/CLISender.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/IRCClient/CLISender.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/CLIDriver.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/CLIDriver.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/CLIListener.java" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/CLISender.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/CLISender.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/CLIServer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/CLIServer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Driver.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Listener.java" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/RSA.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/RSA.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Sender.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Server.java" beforeDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -27,26 +24,23 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/CLIDriver.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-246">
-              <caret line="35" column="68" selection-start-line="35" selection-start-column="68" selection-end-line="35" selection-end-column="68" />
+            <state relative-caret-position="535">
+              <caret line="72" selection-start-line="72" selection-end-line="72" />
+              <folding>
+                <element signature="imports" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/RSA.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="180">
-              <caret line="12" column="1" selection-start-line="12" selection-start-column="1" selection-end-line="12" selection-end-column="1" />
-              <folding>
-                <element signature="e#988#989#0" expanded="true" />
-                <element signature="e#1020#1021#0" expanded="true" />
-                <element signature="e#1064#1065#0" expanded="true" />
-                <element signature="e#1096#1097#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="115">
+              <caret line="15" column="24" selection-start-line="15" selection-start-column="24" selection-end-line="15" selection-end-column="24" />
             </state>
           </provider>
         </entry>
@@ -54,8 +48,11 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/CLISender.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="458">
-              <caret line="103" selection-start-line="103" selection-end-line="103" />
+            <state relative-caret-position="563">
+              <caret line="77" column="24" lean-forward="true" selection-start-line="77" selection-end-line="78" />
+              <folding>
+                <element signature="imports" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -63,8 +60,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/CLIServer.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="300">
-              <caret line="20" selection-start-line="20" selection-end-line="20" />
+            <state relative-caret-position="488">
+              <caret line="42" column="33" selection-start-line="42" selection-start-column="33" selection-end-line="42" selection-end-column="33" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -101,25 +98,27 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/src/CLISender.java" />
-        <option value="$PROJECT_DIR$/src/CLIDriver.java" />
-        <option value="$PROJECT_DIR$/src/CLIServer.java" />
         <option value="$PROJECT_DIR$/src/CLIListener.java" />
         <option value="$PROJECT_DIR$/src/RSA.java" />
+        <option value="$PROJECT_DIR$/src/Server.java" />
+        <option value="$PROJECT_DIR$/src/CLIServer.java" />
+        <option value="$PROJECT_DIR$/src/CLISender.java" />
+        <option value="$PROJECT_DIR$/src/CLIDriver.java" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="2038" />
-    <option name="y" value="32" />
-    <option name="width" value="1392" />
-    <option name="height" value="786" />
+    <option name="x" value="1920" />
+    <option name="y" value="-1" />
+    <option name="width" value="1920" />
+    <option name="height" value="1081" />
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="PackagesPane" />
       <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
@@ -146,7 +145,6 @@
           <select />
         </subPane>
       </pane>
-      <pane id="PackagesPane" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -160,7 +158,8 @@
     <property name="project.structure.last.edited" value="Libraries" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.2" />
-    <property name="settings.editor.selected.configurable" value="preferences.lookFeel" />
+    <property name="run.code.analysis.last.selected.profile" value="pProject Default" />
+    <property name="settings.editor.selected.configurable" value="Errors" />
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -174,7 +173,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Application.Parallel CLIDriver">
     <configuration name="CLIDriver" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="CLIDriver" />
       <module name="IRCClient" />
@@ -182,6 +181,17 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="Parallel CLIDriver" type="Application" factoryName="Application" singleton="false">
+      <option name="MAIN_CLASS_NAME" value="CLIDriver" />
+      <module name="IRCClient" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <list>
+      <item itemvalue="Application.Parallel CLIDriver" />
+      <item itemvalue="Application.CLIDriver" />
+    </list>
     <recent_temporary>
       <list>
         <item itemvalue="Application.CLIDriver" />
@@ -201,23 +211,25 @@
       <workItem from="1548631264221" duration="13059000" />
       <workItem from="1548726516363" duration="9766000" />
       <workItem from="1548806455100" duration="7955000" />
-      <workItem from="1548900469510" duration="7022000" />
+      <workItem from="1548900469510" duration="7097000" />
+      <workItem from="1548952920699" duration="12836000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="37802000" />
+    <option name="totallyTimeSpent" value="50713000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="1984" y="31" width="1856" height="1049" extended-state="6" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.25799337" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.26074973" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Image Layers" order="2" />
       <window_info id="Designer" order="3" />
       <window_info id="UI Designer" order="4" />
       <window_info id="Capture Tool" order="5" />
       <window_info id="Favorites" order="6" side_tool="true" />
+      <window_info anchor="bottom" id="Inspection Results" weight="0.32897604" />
       <window_info anchor="bottom" id="Duplicate detector" order="0" weight="0.32897604" />
       <window_info anchor="bottom" id="Message" order="1" />
       <window_info anchor="bottom" id="Find" order="2" />
@@ -263,34 +275,28 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/CLISender.java">
+    <entry file="file://$PROJECT_DIR$/src/CLIListener.java" />
+    <entry file="file://$PROJECT_DIR$/src/Server.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="458">
-          <caret line="103" selection-start-line="103" selection-end-line="103" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/CLIDriver.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-246">
-          <caret line="35" column="68" selection-start-line="35" selection-start-column="68" selection-end-line="35" selection-end-column="68" />
+        <state relative-caret-position="120">
+          <caret line="24" column="26" lean-forward="true" selection-start-line="24" selection-start-column="26" selection-end-line="24" selection-end-column="26" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/CLIServer.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="300">
-          <caret line="20" selection-start-line="20" selection-end-line="20" />
+        <state relative-caret-position="488">
+          <caret line="42" column="33" selection-start-line="42" selection-start-column="33" selection-end-line="42" selection-end-column="33" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/CLIListener.java">
+    <entry file="file://$PROJECT_DIR$/src/CLISender.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="75">
-          <caret line="23" column="47" selection-start-line="23" selection-start-column="47" selection-end-line="23" selection-end-column="47" />
+        <state relative-caret-position="563">
+          <caret line="77" column="24" lean-forward="true" selection-start-line="77" selection-end-line="78" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
@@ -299,13 +305,17 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/RSA.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="180">
-          <caret line="12" column="1" selection-start-line="12" selection-start-column="1" selection-end-line="12" selection-end-column="1" />
+        <state relative-caret-position="115">
+          <caret line="15" column="24" selection-start-line="15" selection-start-column="24" selection-end-line="15" selection-end-column="24" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/CLIDriver.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="535">
+          <caret line="72" selection-start-line="72" selection-end-line="72" />
           <folding>
-            <element signature="e#988#989#0" expanded="true" />
-            <element signature="e#1020#1021#0" expanded="true" />
-            <element signature="e#1064#1065#0" expanded="true" />
-            <element signature="e#1096#1097#0" expanded="true" />
+            <element signature="imports" expanded="true" />
           </folding>
         </state>
       </provider>
