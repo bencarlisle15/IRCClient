@@ -1,3 +1,0 @@
-#!/bin/bash
-/usr/lib/jvm/java-1.11.0-openjdk-amd64/bin/java -Djava.library.path=/usr/bin/javafx/lib -javaagent:/snap/intellij-idea-ultimate/128/lib/idea_rt.jar=46483:/snap/intellij-idea-ultimate/128/bin -Dfile.encoding=UTF-8 -classpath /home/bencarlisle15/IdeaProjects/IRCClient/out/production/IRCClient:/home/bencarlisle15/.m2/repository/org/json/json/20180813/json-20180813.jar:/usr/bin/javafx/lib/src.zip:/usr/bin/javafx/lib/javafx-swt.jar:/usr/bin/javafx/lib/javafx.web.jar:/usr/bin/javafx/lib/javafx.base.jar:/usr/bin/javafx/lib/javafx.fxml.jar:/usr/bin/javafx/lib/javafx.media.jar:/usr/bin/javafx/lib/javafx.swing.jar:/usr/bin/javafx/lib/javafx.controls.jar:/usr/bin/javafx/lib/javafx.graphics.jar Driver
-

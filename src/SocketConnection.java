@@ -27,7 +27,6 @@ abstract class SocketConnection implements Runnable {
             BufferedOutputStream outputStream = new BufferedOutputStream(socket.getOutputStream());
             outputStream.write(dataToWrite);
             outputStream.flush();
-            socket.shutdownOutput();
         } catch (IOException e) {
             e.printStackTrace();
             return false;
@@ -44,17 +43,18 @@ abstract class SocketConnection implements Runnable {
             } catch (JSONException e) {
                 String decryptedMessage = encryptor.decryptAES(encryptedMessage);
                 if (decryptedMessage == null) {
-                    return new JSONObject(new JSONStringer().object().key("status").value(417).key("message").value("Decryption error occurred, try re-logging in").endObject());
+                    return new JSONObject(new JSONStringer().object().key("status").value(417).key("message").key("Decryption error occurred, try re-logging in").endObject());
                 }
                return new JSONObject(decryptedMessage);
             }
         } catch (IOException e) {
-            return new JSONObject(new JSONStringer().object().key("status").value(400).key("message").value("Could not connect to server").endObject());
+            return new JSONObject(new JSONStringer().object().key("status").value(400).key("message").key("Could not connect to server").endObject());
         }
 
     }
 
     void printMessage(String message) {
         System.out.println(message);
+        JOptionPane.showMessageDialog(null, message);
     }
 }

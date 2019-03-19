@@ -1,17 +1,31 @@
 import org.json.JSONStringer;
 
-import javax.swing.*;
-import java.awt.*;
-import java.io.*;
-import java.util.Base64;
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import java.io.IOException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.Scanner;
 
 public class Driver {
 
-    private final static String serverIP = "127.0.0.1";
-    private final static int serverPort = 1515;
+    private final static String serverIP = "172.16.68.71";
+    private final static int serverPort = 4000;
 
     public static void main(String[] args) {
+        try {
+            mainExceptions();
+        } catch (IOException | NoSuchAlgorithmException | InvalidKeyException | NoSuchPaddingException | BadPaddingException | InvalidKeySpecException | IllegalBlockSizeException | InvalidAlgorithmParameterException e) {
+            e.printStackTrace();
+            System.out.println("Encryption Error");
+            System.exit(1);
+        }
+    }
+
+    private static void mainExceptions() throws InvalidKeySpecException, NoSuchAlgorithmException, IOException, InvalidKeyException, BadPaddingException, NoSuchPaddingException, IllegalBlockSizeException, InvalidAlgorithmParameterException {
         Scanner scanner = new Scanner(System.in);
         Encryptor encryptor = new Encryptor();
         Sender sender = new Sender(serverIP, serverPort, encryptor);
@@ -24,7 +38,7 @@ public class Driver {
             if (arguments.length == 0) {
                 continue;
             }
-            String user, password, jsonText, message, sessionID, to;
+            String user, password, jsonText;
             switch (arguments[0]) {
                 case "register":
                     if (arguments.length != 3) {
@@ -32,9 +46,8 @@ public class Driver {
                         break;
                     }
                     user = arguments[1];
-                    encryptor.setUser(user);
                     password = arguments[2];
-                    jsonText = new JSONStringer().object().key("messageType").value("register").key("user").value(user).key("password").value(password).endObject().toString();
+                    jsonText = new JSONStringer().object().key("message_type").value("register").key("user").value(user).key("password").value(password).endObject().toString();
                     sender.sendMessage(encryptor.encryptEverything(jsonText, true));
                     break;
                 case "login":
@@ -45,7 +58,7 @@ public class Driver {
                     user = arguments[1];
                     encryptor.setUser(user);
                     password = arguments[2];
-                    jsonText = new JSONStringer().object().key("messageType").value("login").key("user").value(user).key("password").value(password).endObject().toString();
+                    jsonText = new JSONStringer().object().key("message_type").value("login").key("user").value(user).key("password").value(password).endObject().toString();
                     sender.sendMessage(encryptor.encryptEverything(jsonText, false));
                     break;
                 case "send":
@@ -53,40 +66,15 @@ public class Driver {
                         System.out.println("Wrong number of arguments");
                         break;
                     }
-                    to = arguments[1];
-                    message = createMessage(arguments);
-                    sessionID = sender.getSessionID();
-                    jsonText = new JSONStringer().object().key("messageType").value("sendMessage").key("to").value(to).key("isFile").value(false).key("message").value(message).key("sessionId").value(sessionID).endObject().toString();
-                    sender.sendMessage(encryptor.encryptEverything(jsonText, false));
-                    break;
-                case "file":
-                    if (arguments.length != 2) {
-                        System.out.println("Wrong number of arguments");
-                        break;
-                    }
-                    to = arguments[1];
-                    FileDialog fd;
-                    do {
-                        fd = new FileDialog(new JFrame());
-                        fd.setVisible(true);
-                    } while (fd.getFiles().length != 1);
-                    message = getBytesFromFile(fd.getFiles()[0]);
-                    sessionID = sender.getSessionID();
-                    jsonText = new JSONStringer().object().key("messageType").value("sendMessage").key("to").value(to).key("isFile").value(true).key("message").value(message).key("sessionId").value(sessionID).endObject().toString();
+                    String to = arguments[1];
+                    String message = createMessage(arguments);
+                    String sessionID = sender.getSessionID();
+                    jsonText = new JSONStringer().object().key("message_type").value("send_message").key("from").value(encryptor.getUser()).key("to").value(to).key("message").value(message).key("session_id").value(sessionID).endObject().toString();
                     sender.sendMessage(encryptor.encryptEverything(jsonText, false));
                     break;
                 default:
                     System.out.println("Command not found");
             }
-        }
-    }
-
-    private static String getBytesFromFile(File file) {
-        try {
-            FileInputStream fileInputStream = new FileInputStream(file);
-            return Base64.getEncoder().encodeToString(fileInputStream.readAllBytes());
-        } catch (IOException e) {
-            return Base64.getEncoder().encodeToString(new byte[0]);
         }
     }
 

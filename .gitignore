@@ -81,5 +81,4 @@ fabric.properties
 .idea/sonarlint
 
 # End of https://www.gitignore.io/api/intellij
-secretAES.ks
-secretHMAC.ks
+secret.ks

@@ -8,11 +8,16 @@ import java.util.ArrayList;
 public class Sender extends SocketConnection {
 
     private final ArrayList<byte[]> messages = new ArrayList<>();
+    private boolean signedIn = false;
 
     Sender(String serverIP, int serverPort, Encryptor encryptor) {
         SocketConnection.serverIP = serverIP;
         SocketConnection.serverPort = serverPort;
         SocketConnection.encryptor = encryptor;
+    }
+
+    boolean isSignedIn() {
+        return signedIn;
     }
 
     public void run() {
@@ -47,12 +52,11 @@ public class Sender extends SocketConnection {
 
     JSONObject read(Socket socket) {
         JSONObject json = super.read(socket);
-        System.out.println(json.toString()
-        );
         String message = json.getString("message");
         printMessage(message);
         if (json.getInt("status") == 202) {
-            sessionID = json.get("sessionId").toString();
+            sessionID = json.get("session_id").toString();
+            signedIn = true;
             new Thread(new Server()).start();
         }
         return null;
