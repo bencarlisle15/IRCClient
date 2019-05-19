@@ -12,7 +12,7 @@ class Server extends SocketConnection {
     private boolean running;
 
     Server() {
-        defaultJson = encryptor.encryptEverything(new JSONStringer().object().key("messageType").value("ping").key("sessionId").value(sessionID).endObject().toString(), false).getBytes(StandardCharsets.UTF_8);
+        defaultJson = encryptor.encryptEverything(new JSONStringer().object().key("messageType").value("ping").key("nonce").value("0").key("sessionId").value(sessionID).endObject().toString(), false).getBytes(StandardCharsets.UTF_8);
     }
 
     JSONObject read(Socket socket) {

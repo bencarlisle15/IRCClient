@@ -3,13 +3,18 @@ import org.json.JSONWriter;
 
 import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.*;
+import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
 import java.util.Base64;
@@ -34,15 +39,21 @@ class Encryptor {
             String mainData = encryptAES(aesKey, data, iv);
             String user = encryptRSA(getUser().getBytes(StandardCharsets.UTF_8));
             String aesKeyString = encryptRSA(aesKey.getEncoded());
-            JSONWriter json = new JSONStringer().object().key("user").value(user).key("aesKey").value(aesKeyString).key("iv").value(iv).key("data").value(mainData);
+            String rsaIV = encryptRSA(iv);
+            JSONWriter json = new JSONStringer().object().key("user").value(user).key("aesKey").value(aesKeyString).key("iv").value(rsaIV).key("data").value(mainData);
             if (withKey) {
                 SecretKey macKey = createMACKey();
                 String macKeyString = encryptRSA(macKey.getEncoded());
-                String mac = new String(generateMac(macKey, mainData.getBytes(StandardCharsets.UTF_8)));
+                String mac = encryptRSA(generateMac(macKey, mainData.getBytes(StandardCharsets.UTF_8)));
                 json = json.key("macKey").value(macKeyString).key("mac").value(mac);
+            } else {
+                String signature = signData(getSelfPrivateKey(), mainData.getBytes(StandardCharsets.UTF_8));
+                json = json.key("signature").value(signature);
             }
-            return json.endObject().toString();
-        } catch (InvalidKeySpecException | NoSuchAlgorithmException | BadPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | NoSuchPaddingException | IOException | IllegalBlockSizeException e) {
+            String response = json.endObject().toString();
+            return response;
+        } catch (InvalidKeySpecException | NoSuchAlgorithmException | BadPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | NoSuchPaddingException | IOException | IllegalBlockSizeException | SignatureException e) {
+            e.printStackTrace();
             return null;
         }
     }
@@ -54,32 +65,27 @@ class Encryptor {
         return Base64.getEncoder().encodeToString(cipher.doFinal(withAdditional));
     }
 
-    String decryptAES(byte[] jsonText) {
+    public String decryptAES(String aesKey, String jsonText, String ivString) {
         try {
             Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-            SecretKey secretKey = createAESKey();
-            jsonText = Base64.getDecoder().decode(jsonText);
-            byte[] mac = Arrays.copyOfRange(jsonText, 0, 64);
-            byte[] ivBytes = Arrays.copyOfRange(jsonText, 64, 80);
-            byte[] toDecode = Arrays.copyOfRange(jsonText, 80, jsonText.length);
-            if (!isValidMac(mac, toDecode)) {
-                //todo error handling
-                System.out.println("INVALID MAC");
-                throw new InvalidKeyException();
-            }
+            byte[] aesBytes = decryptRSA(aesKey);
+            SecretKey secretKey = getAESKey(aesBytes);
+            byte[] ciphertext = Base64.getDecoder().decode(jsonText);
+            byte[] ivBytes = decryptRSA(ivString);
             IvParameterSpec iv = new IvParameterSpec(ivBytes);
             cipher.init(Cipher.DECRYPT_MODE, secretKey, iv);
-            return new String(cipher.doFinal(toDecode));
-        } catch (IOException | NoSuchAlgorithmException | InvalidKeyException | InvalidAlgorithmParameterException | NoSuchPaddingException | BadPaddingException | IllegalBlockSizeException e) {
+            return new String(cipher.doFinal(ciphertext));
+        } catch (NoSuchAlgorithmException | InvalidKeyException | InvalidAlgorithmParameterException | NoSuchPaddingException | BadPaddingException | IllegalBlockSizeException | InvalidKeySpecException | IOException e) {
+            e.printStackTrace();
             return null;
         }
     }
 
-    private boolean isValidMac(byte[] expectedMac, byte[] ciphertext) throws IOException, NoSuchAlgorithmException, InvalidKeyException {
-        SecretKey secretKey = createMACKey();
-        Mac mac = Mac.getInstance("HMACSHA512");
-        mac.init(secretKey);
-        return Arrays.equals(expectedMac, mac.doFinal(ciphertext));
+    private byte[] decryptRSA(String ciphertext) throws InvalidKeySpecException, NoSuchAlgorithmException, IOException, NoSuchPaddingException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
+        Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+        cipher.init(Cipher.DECRYPT_MODE, getSelfPrivateKey());
+        byte[] decoded = Base64.getDecoder().decode(ciphertext.getBytes(StandardCharsets.UTF_8));
+        return cipher.doFinal(decoded);
     }
 
     private byte[] getIV() {
@@ -99,7 +105,21 @@ class Encryptor {
     private byte[] generateMac(SecretKey secretKey, byte[] ciphertext) throws NoSuchAlgorithmException, InvalidKeyException {
         Mac mac = Mac.getInstance("HMACSHA512");
         mac.init(secretKey);
-        return mac.doFinal(ciphertext);
+        byte[] macc= mac.doFinal(ciphertext);
+        return macc;
+    }
+
+    private String signData(RSAPrivateKey privateKey, byte[] data) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+        Signature privateSignature = Signature.getInstance("SHA512withRSA");
+        privateSignature.initSign(privateKey);
+        MessageDigest md = MessageDigest.getInstance("SHA-512");
+        byte[] hash = md.digest(data);
+        privateSignature.update(hash);
+        return Base64.getEncoder().encodeToString(privateSignature.sign());
+    }
+
+    private SecretKey getAESKey(byte[] keyBytes) {
+        return new SecretKeySpec(keyBytes, "AES");
     }
 
     private SecretKey createAESKey() throws NoSuchAlgorithmException {
@@ -110,6 +130,43 @@ class Encryptor {
     private SecretKey createMACKey() throws NoSuchAlgorithmException {
         KeyGenerator keyGenerator = KeyGenerator.getInstance("HMACSHA512");
         return keyGenerator.generateKey();
+    }
+
+    private void generateKeyPair() throws IOException, NoSuchAlgorithmException {
+        KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
+        kpg.initialize(4096);
+        KeyPair kp = kpg.generateKeyPair();
+        Key publicKey = kp.getPublic();
+        Key privateKey = kp.getPrivate();
+        FileOutputStream out = new FileOutputStream("private.key");
+        out.write(privateKey.getEncoded());
+        out = new FileOutputStream("public.der");
+        out.write(publicKey.getEncoded());
+        out.close();
+    }
+
+    private RSAPrivateKey getSelfPrivateKey() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+        if (!new File("private.key").exists()) {
+            generateKeyPair();
+        }
+        byte[] keyBytes = Files.readAllBytes(Paths.get("private.key"));
+        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
+        KeyFactory fact = KeyFactory.getInstance("RSA");
+        return (RSAPrivateKey) fact.generatePrivate(keySpec);
+    }
+
+    public RSAPublicKey getSelfPublicKey() {
+        try {
+            if (!new File("public.der").exists()) {
+                generateKeyPair();
+            }
+            byte[] keyBytes = Files.readAllBytes(Paths.get("public.der"));
+            X509EncodedKeySpec spec = new X509EncodedKeySpec(keyBytes);
+            KeyFactory kf = KeyFactory.getInstance("RSA");
+            return (RSAPublicKey) kf.generatePublic(spec);
+        } catch (IOException | InvalidKeySpecException | NoSuchAlgorithmException e) {
+            return null;
+        }
     }
 
     private RSAPublicKey getServerPublicKey() throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {

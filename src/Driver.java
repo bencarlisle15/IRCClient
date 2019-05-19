@@ -3,6 +3,7 @@ import org.json.JSONStringer;
 import javax.swing.*;
 import java.awt.*;
 import java.io.*;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Scanner;
 
@@ -34,7 +35,7 @@ public class Driver {
                     user = arguments[1];
                     encryptor.setUser(user);
                     password = arguments[2];
-                    jsonText = new JSONStringer().object().key("messageType").value("register").key("user").value(user).key("password").value(password).endObject().toString();
+                    jsonText = new JSONStringer().object().key("messageType").value("register").key("nonce").value("0").key("password").value(password).key("publicKey").value(Base64.getEncoder().encodeToString(encryptor.getSelfPublicKey().getEncoded())).endObject().toString();
                     sender.sendMessage(encryptor.encryptEverything(jsonText, true));
                     break;
                 case "login":
@@ -45,7 +46,7 @@ public class Driver {
                     user = arguments[1];
                     encryptor.setUser(user);
                     password = arguments[2];
-                    jsonText = new JSONStringer().object().key("messageType").value("login").key("user").value(user).key("password").value(password).endObject().toString();
+                    jsonText = new JSONStringer().object().key("messageType").value("login").key("nonce").value("0").key("password").value(password).endObject().toString();
                     sender.sendMessage(encryptor.encryptEverything(jsonText, false));
                     break;
                 case "send":
@@ -56,7 +57,7 @@ public class Driver {
                     to = arguments[1];
                     message = createMessage(arguments);
                     sessionID = sender.getSessionID();
-                    jsonText = new JSONStringer().object().key("messageType").value("sendMessage").key("to").value(to).key("isFile").value(false).key("message").value(message).key("sessionId").value(sessionID).endObject().toString();
+                    jsonText = new JSONStringer().object().key("messageType").value("sendMessage").key("nonce").value("0").key("to").value(to).key("isFile").value(false).key("message").value(message).key("sessionId").value(sessionID).endObject().toString();
                     sender.sendMessage(encryptor.encryptEverything(jsonText, false));
                     break;
                 case "file":
