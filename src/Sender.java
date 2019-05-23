@@ -8,6 +8,7 @@ import java.util.ArrayList;
 public class Sender extends SocketConnection {
 
     private final ArrayList<byte[]> messages = new ArrayList<>();
+    private Server server;
 
     Sender(String serverIP, int serverPort, Encryptor encryptor) {
         SocketConnection.serverIP = serverIP;
@@ -40,20 +41,27 @@ public class Sender extends SocketConnection {
         }
     }
 
+    public void killServer() {
+        server.killServer();
+    }
+
     void sendMessage(String jsonText) {
         addNextMessage((jsonText + "\n").getBytes(StandardCharsets.UTF_8));
-        new Thread(this).start();
+        Thread senderThread = new Thread(this);
+        senderThread.setDaemon(true);
+        senderThread.start();
     }
 
     JSONObject read(Socket socket) {
         JSONObject json = super.read(socket);
-        System.out.println(json.toString()
-        );
         String message = json.getString("message");
         printMessage(message);
         if (json.getInt("status") == 202) {
             sessionID = json.get("sessionId").toString();
-            new Thread(new Server()).start();
+            server = new Server();
+            Thread serverThread = new Thread(server);
+            serverThread.setDaemon(true);
+            serverThread.start();
         }
         return null;
     }

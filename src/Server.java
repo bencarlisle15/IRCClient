@@ -5,14 +5,18 @@ import java.io.*;
 import java.net.ConnectException;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.security.Timestamp;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Base64;
 
 class Server extends SocketConnection {
-    private final byte[] defaultJson;
     private boolean running;
 
-    Server() {
-        defaultJson = encryptor.encryptEverything(new JSONStringer().object().key("messageType").value("ping").key("nonce").value("0").key("sessionId").value(sessionID).endObject().toString(), false).getBytes(StandardCharsets.UTF_8);
+    private byte[] getDefaultJson() {
+        return encryptor.encryptEverything(new JSONStringer().object().key("messageType").value("ping").key("nonce").value(encryptor.generateNonce()).key("sessionId").value(sessionID).endObject().toString(), false).getBytes(StandardCharsets.UTF_8);
+
     }
 
     JSONObject read(Socket socket) {
@@ -36,21 +40,29 @@ class Server extends SocketConnection {
                         System.out.println("Could not create incoming file");
                     }
                 } else {
-                    printMessage(json.toString());
+                    ZonedDateTime dateTime = Instant.ofEpochSecond(json.getInt("timestamp")).atZone(ZoneId.systemDefault());
+                    String toSend = "Message from " + json.getString("sender") + " (sent " + dateTime.toLocalDate() + " at " + dateTime.toLocalTime() + "): " + json.getString("message");
+                    printMessage(toSend);
                 }
                 break;
             case 403:
                 printMessage(json.getString("message"));
-                System.out.println("Killing client server");
+                printMessage("Killing client");
                 running = false;
         }
         return null;
     }
 
+    public void killServer() {
+        running = false;
+    }
+
     public void run() {
         running = true;
         while (running) {
-            new Thread(this::singleServerOperation).start();
+            Thread singleThread = new Thread(this::singleServerOperation);
+            singleThread.setDaemon(true);
+            singleThread.start();
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
@@ -62,7 +74,7 @@ class Server extends SocketConnection {
     private void singleServerOperation() {
         try {
             Socket socket = new Socket(serverIP, serverPort);
-            write(socket, defaultJson);
+            write(socket, getDefaultJson());
             read(socket);
             socket.close();
         } catch (ConnectException e) {

@@ -1,0 +1,12 @@
+<component name="ArtifactManager">
+  <artifact name="SCAClient:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/SCAClient_jar</output-path>
+    <root id="root">
+      <element id="archive" name="SCAClient.jar">
+        <element id="module-output" name="SCAClient" />
+      </element>
+      <element id="library" level="project" name="org.json:json:20180813" />
+      <element id="library" level="project" name="bouncycastle:bcprov-jdk16:140" />
+    </root>
+  </artifact>
+</component>

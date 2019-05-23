@@ -1,8 +1,11 @@
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.json.JSONStringer;
 import org.json.JSONWriter;
 
 import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.OAEPParameterSpec;
+import javax.crypto.spec.PSource;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -13,9 +16,7 @@ import java.nio.file.Paths;
 import java.security.*;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
+import java.security.spec.*;
 import java.util.Arrays;
 import java.util.Base64;
 
@@ -37,14 +38,14 @@ class Encryptor {
             SecretKey aesKey = createAESKey();
             byte[] data = jsonText.getBytes(StandardCharsets.UTF_8);
             String mainData = encryptAES(aesKey, data, iv);
-            String user = encryptRSA(getUser().getBytes(StandardCharsets.UTF_8));
-            String aesKeyString = encryptRSA(aesKey.getEncoded());
-            String rsaIV = encryptRSA(iv);
+            String user = encryptRSA(getUser().getBytes(StandardCharsets.UTF_8), "user".getBytes(StandardCharsets.UTF_8));
+            String aesKeyString = encryptRSA(aesKey.getEncoded(), "aesKey".getBytes(StandardCharsets.UTF_8));
+            String rsaIV = encryptRSA(iv, "iv".getBytes(StandardCharsets.UTF_8));
             JSONWriter json = new JSONStringer().object().key("user").value(user).key("aesKey").value(aesKeyString).key("iv").value(rsaIV).key("data").value(mainData);
             if (withKey) {
                 SecretKey macKey = createMACKey();
-                String macKeyString = encryptRSA(macKey.getEncoded());
-                String mac = encryptRSA(generateMac(macKey, mainData.getBytes(StandardCharsets.UTF_8)));
+                String macKeyString = encryptRSA(macKey.getEncoded(), "macKey".getBytes(StandardCharsets.UTF_8));
+                String mac = encryptRSA(generateMac(macKey, mainData.getBytes(StandardCharsets.UTF_8)), "mac".getBytes(StandardCharsets.UTF_8));
                 json = json.key("macKey").value(macKeyString).key("mac").value(mac);
             } else {
                 String signature = signData(getSelfPrivateKey(), mainData.getBytes(StandardCharsets.UTF_8));
@@ -58,10 +59,21 @@ class Encryptor {
         }
     }
 
+    public byte[] randomBytes(int length) {
+        SecureRandom random = new SecureRandom();
+        byte[] bytes = new byte[length];
+        random.nextBytes(bytes);
+        return bytes;
+    }
 
-    private String encryptRSA(byte[] withAdditional) throws NoSuchPaddingException, NoSuchAlgorithmException, BadPaddingException, IllegalBlockSizeException, InvalidKeyException, IOException, InvalidKeySpecException {
-        Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
-        cipher.init(Cipher.ENCRYPT_MODE, getServerPublicKey());
+    public String generateNonce() {
+        return new String(randomBytes(128));
+    }
+
+    private String encryptRSA(byte[] withAdditional, byte[] label) throws NoSuchPaddingException, NoSuchAlgorithmException, BadPaddingException, IllegalBlockSizeException, InvalidKeyException, IOException, InvalidKeySpecException, InvalidAlgorithmParameterException {
+        Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA-512AndMGF1Padding");
+        OAEPParameterSpec oaepParams = new OAEPParameterSpec("SHA-512", "MGF1", new MGF1ParameterSpec("SHA-512"), PSource.PSpecified.DEFAULT);
+        cipher.init(Cipher.ENCRYPT_MODE, getServerPublicKey(), oaepParams);
         return Base64.getEncoder().encodeToString(cipher.doFinal(withAdditional));
     }
 
@@ -81,17 +93,16 @@ class Encryptor {
         }
     }
 
-    private byte[] decryptRSA(String ciphertext) throws InvalidKeySpecException, NoSuchAlgorithmException, IOException, NoSuchPaddingException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
-        Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
-        cipher.init(Cipher.DECRYPT_MODE, getSelfPrivateKey());
+    private byte[] decryptRSA(String ciphertext) throws InvalidKeySpecException, NoSuchAlgorithmException, IOException, NoSuchPaddingException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException, InvalidAlgorithmParameterException {
+        Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA-512AndMGF1Padding");
+        OAEPParameterSpec oaepParams = new OAEPParameterSpec("SHA-512", "MGF1", new MGF1ParameterSpec("SHA-512"), PSource.PSpecified.DEFAULT);
+        cipher.init(Cipher.DECRYPT_MODE, getSelfPrivateKey(), oaepParams);
         byte[] decoded = Base64.getDecoder().decode(ciphertext.getBytes(StandardCharsets.UTF_8));
         return cipher.doFinal(decoded);
     }
 
     private byte[] getIV() {
-        byte[] ivBytes = new byte[16];
-        new SecureRandom().nextBytes(ivBytes);
-        return ivBytes;
+        return randomBytes(16);
     }
 
     private String encryptAES(SecretKey secretKey, byte[] jsonText, byte[] ivBytes) throws NoSuchPaddingException, NoSuchAlgorithmException, BadPaddingException, IllegalBlockSizeException, InvalidAlgorithmParameterException, InvalidKeyException {
@@ -105,16 +116,14 @@ class Encryptor {
     private byte[] generateMac(SecretKey secretKey, byte[] ciphertext) throws NoSuchAlgorithmException, InvalidKeyException {
         Mac mac = Mac.getInstance("HMACSHA512");
         mac.init(secretKey);
-        byte[] macc= mac.doFinal(ciphertext);
-        return macc;
+        return mac.doFinal(ciphertext);
     }
 
-    private String signData(RSAPrivateKey privateKey, byte[] data) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
-        Signature privateSignature = Signature.getInstance("SHA512withRSA");
+    private String signData(RSAPrivateKey privateKey, byte[] data) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, InvalidAlgorithmParameterException {
+        Signature privateSignature = Signature.getInstance("SHA512withRSA/PSS", new BouncyCastleProvider());
+        privateSignature.setParameter(new PSSParameterSpec("SHA-512", "MGF1", MGF1ParameterSpec.SHA512, 64, 1));
         privateSignature.initSign(privateKey);
-        MessageDigest md = MessageDigest.getInstance("SHA-512");
-        byte[] hash = md.digest(data);
-        privateSignature.update(hash);
+        privateSignature.update(data);
         return Base64.getEncoder().encodeToString(privateSignature.sign());
     }
 
